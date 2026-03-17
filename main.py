@@ -5,79 +5,96 @@ import time
 # Sahifa sozlamalari
 st.set_page_config(page_title="ZEON Global Eco", page_icon="🌍", layout="centered")
 
-# Dizaynni yanada kuchaytiramiz
+# Dizayn
 st.markdown("""
     <style>
-    .main { background-color: #f4f9f4; }
     .stButton>button {
         background-color: #2e7d32;
         color: white;
-        border-radius: 25px;
-        height: 3em;
-        font-weight: bold;
+        border-radius: 20px;
+        width: 100%;
     }
-    .stTextInput>div>div>input {
-        border-radius: 15px;
+    .status-box {
+        padding: 10px;
+        border-radius: 10px;
+        background-color: #e8f5e9;
+        border: 1px solid #2e7d32;
     }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("🌍 ZEON: Global Ekologik Harakat")
-st.write("Dunyoni asrash uchun kichik harakat qiling va tarixdan joy oling!")
+st.title("🌍 ZEON: Ekologik Kelajak")
 
-# Foydalanuvchi ma'lumotlarini saqlash
+# Session state
 if 'points' not in st.session_state:
     st.session_state.points = 0
 if 'user_name' not in st.session_state:
     st.session_state.user_name = ""
 
-# Sidebar - Profil
+# Sidebar
 st.sidebar.header("👤 Shaxsiy Kabinet")
-name_input = st.sidebar.text_input("Ismingizni yozing:", value=st.session_state.user_name)
+name_input = st.sidebar.text_input("Ismingizni kiriting:", value=st.session_state.user_name)
 if name_input:
     st.session_state.user_name = name_input
 
 st.sidebar.metric("Sizning ballaringiz", f"{st.session_state.points} ZN")
-st.sidebar.write("---")
-st.sidebar.success("Har bir rasm - tabiat uchun hayot!")
 
-# Asosiy qism
-tab1, tab2, tab3 = st.tabs(["📸 Harakatni yozib olish", "🏆 Reyting", "💡 Tavsiyalar"])
+# Status aniqlash
+user_status = "Yangi foydalanuvchi"
+if st.session_state.points >= 1000:
+    user_status = "🌳 Tabiat Qahramoni"
+elif st.session_state.points >= 500:
+    user_status = "🌱 Eko-Faol"
+elif st.session_state.points >= 100:
+    user_status = "🍃 Eko-Shogird"
+
+st.sidebar.markdown(f"<div class='status-box'><b>Status:</b> {user_status}</div>", unsafe_allow_html=True)
+
+# TABLAR
+tab1, tab2, tab3 = st.tabs(["📸 Rasm yuklash", "🏆 Reyting", "🎁 Eko-Do'kon"])
 
 with tab1:
-    if st.session_state.user_name == "":
-        st.warning("Iltimos, avval yon menyuda (sidebar) ismingizni kiriting!")
+    if not st.session_state.user_name:
+        st.warning("Davom etish uchun sidebar-da ismingizni yozing!")
     else:
-        st.write(f"Salom, **{st.session_state.user_name}**! Bugun qanday yaxshilik qildingiz?")
-        uploaded_file = st.file_uploader("Rasmni yuklang (Daraxt, tozalik va h.k.)", type=["jpg", "png", "jpeg"])
-
+        st.write(f"Salom, **{st.session_state.user_name}**! Bugun tabiat uchun nima qildingiz?")
+        uploaded_file = st.file_uploader("Rasmni tanlang", type=["jpg", "png", "jpeg"])
         if uploaded_file:
-            with st.spinner('ZEON AI rasmni tahlil qilmoqda...'):
+            with st.spinner('Tahlil qilinmoqda...'):
                 time.sleep(2)
-                st.image(uploaded_file, caption="Sizning hissangiz!", use_container_width=True)
+                st.image(uploaded_file, use_container_width=True)
                 bonus = random.randint(30, 150)
                 st.session_state.points += bonus
-                st.success(f"Ajoyib! {st.session_state.user_name}, sizga {bonus} ZEON ball berildi!")
+                st.success(f"Ajoyib! +{bonus} ball berildi!")
                 st.balloons()
 
 with tab2:
     st.header("🏆 Global Leaderboard")
-    st.write("Eng faol tabiat himoyachilari:")
-    
-    current_user = st.session_state.user_name if st.session_state.user_name else "Siz"
-    
-    leaderboard_data = {
-        "O'rin": [1, 2, 3, 4],
-        "Foydalanuvchi": ["Botir_Eco", "Green_Queen", "Sarvar_Forest", current_user],
-        "Ballar": [2800, 2450, 1900, st.session_state.points]
-    }
-    st.table(leaderboard_data)
+    current_name = st.session_state.user_name if st.session_state.user_name else "Siz"
+    st.table({
+        "Foydalanuvchi": ["Botir_Eco", "Green_Queen", current_name],
+        "Ballar": [2800, 2450, st.session_state.points],
+        "Status": ["🌳 Qahramon", "🌳 Qahramon", user_status]
+    })
 
 with tab3:
-    st.info("Bilardingizmi? Bitta ekilgan daraxt yiliga 22 kg karbonat angidridni yutadi!")
-    st.write("1. Plastikdan voz keching.")
-    st.write("2. Suvni tejang.")
-    st.write("3. Chiqindini saralang.")
+    st.header("🎁 ZEON Sovg'alar do'koni")
+    st.write("To'plangan ballaringizni quyidagi mukofotlarga almashtiring:")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Virtual")
+        st.info("📜 Eko-Sertifikat (1000 ZN)")
+        st.info("🎖 Profil uchun belgi (500 ZN)")
+    with col2:
+        st.subheader("Haqiqiy (Yaqinda)")
+        st.warning("🌳 Daraxt ko'chati (5000 ZN)")
+        st.warning("🛍 Eko-sumka (3000 ZN)")
+        st.warning("☕️ Qahva uchun chegirma (2000 ZN)")
+    
+    st.write("---")
+    st.caption("Eslatma: Haqiqiy sovg'alar hamkorlarimiz qo'shilgandan so'ng faollashadi.")
 
 st.divider()
-st.caption("ZEON AI © 2026. Global Climate Tech Project.")
+st.caption("ZEON AI © 2026. $800B Vision.")
+    
